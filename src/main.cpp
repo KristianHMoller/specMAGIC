@@ -35,20 +35,24 @@ int main(int argc, char* argv[]) {
         threads = omp_get_num_threads();
     }
 
-    // Safety check
-    if (argc != 4) {
-        fprintf(stderr,
-            "Usage: %s <home-directory> <channel> <timer-flag>\n"
-            "Expected exactly 3 input arguments, but received %d.\n"
-            "Example: %s /path/to/home ir_105 1\n",
-            argv[0], argc - 1, argv[0]);
+    // Safety check: require home path and channel, timer flag is optional.
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <home_path> <channel> [timer_flag]\n", argv[0]);
         return 1;
     }
 
     // Home directory same as in the driver script
     std::string home = argv[1];
-    std::string channel = argv[2];     // the mtg channel 
-    bool timer = std::stoi(argv[3]) != 0;
+    std::string channel = argv[2];     // the mtg channel
+    bool timer = false;
+    if (argc >= 4) {
+        try {
+            timer = std::stoi(argv[3]) != 0;
+        } catch (const std::exception&) {
+            fprintf(stderr, "Invalid timer_flag '%s'. Expected 0 or 1.\n", argv[3]);
+            return 1;
+        }
+    }
     
     // Get setup from the configuration file
     Config c = loadConfig("magic-config.asc", home);
@@ -130,7 +134,10 @@ int main(int argc, char* argv[]) {
 
             // Get the pixel position in line and columns
             unsigned int col, lin;
-            Satellite::geo2Image(a.lat, a.lon, img.info, col, lin);
+            // Satellite::geo2Image(a.lat, a.lon, img.info, col, lin);
+            // std::cout << "a.lat, a.lon, a.deltalon_rad: " << a.lat << ", " << a.lon << ", " << a.deltalon_rad << '\n';
+
+            Satellite::geo2Image(a.lat, a.lon - a.deltalon_rad, img.info, col, lin);
 
             int line = lin; int column = col;
             if (img.info.flip_vertical) line = Satellite::flipVertical(lin, img.info.num_lines);

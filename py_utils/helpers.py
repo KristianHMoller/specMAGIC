@@ -361,10 +361,10 @@ def plot_latest_product(product, data_dir, figs_dir, extent):
 
     ## Fixed colour limits, for giffing
     PRODUCT_LIMITS = {
-        "GHI": (0, 1000),   
-        "DNI": (0, 1000),   
+        "GHI": (0, 1100),
+        "DNI": (0, 1100),
         "CAL": (None, None),
-        "CSR": (0, 1000),      
+        "CSR": (0, 1100),
     }
     vmin, vmax = PRODUCT_LIMITS.get(product, (None, None))
 

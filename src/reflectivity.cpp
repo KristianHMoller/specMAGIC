@@ -194,13 +194,8 @@ namespace Reflectivity {
                 result = modis_albedo;
             } 
         
-        } 
-
-        // Fall back to the land-use albedo if the landmap was asked for, or if the
-        // preferred source did not yield a sensible value. This test must sit outside
-        // the branch above: MODIS has no data over water, so on that path an
-        // unusable value is the common case, not the exceptional one.
-        if (result < 0) {
+        // if landmap is specified OR the other calculations did not find sensible value
+        } else if (alb_source == AlbedoType::LANDMAP || result < 0) {
 
             result = getSurfaceAlbedo(climatologies, a, alb, band) * fallback_correction;
             
@@ -223,12 +218,7 @@ namespace Reflectivity {
                 result = modis_albedo;
             } 
 
-        }
-
-        // See the note in getBestKatoSurfaceAlbedo: the fallback must be reachable
-        // from the MODIS path too. An albedo of -1 here would drive Rmin negative in
-        // effectiveCloudAlbedo and make clear water read as cloudy.
-        if (result < 0) {
+        } else if (alb_source == AlbedoType::LANDMAP || result < 0) {
 
             int band = Reflectivity::wavelengthToKatoBand(wavelength_nm);
             band--;
@@ -249,7 +239,7 @@ namespace Reflectivity {
 MAGIC_REAL effectiveCloudAlbedo(Image& img, SolarParameters sun, Climate& climatologies, AlbedoType alb_source, GroundAlbedo& alb,
     const ModisBrdf::ModisBrdfAlbedo& modis, Area a, PixelClimate& clim, int line, int col) {
 
-    MAGIC_REAL Rmax = 3500;
+    MAGIC_REAL Rmax = 920;
 
     // Radiance, scaled by angle
     MAGIC_REAL radi = (static_cast<MAGIC_REAL>(img.im.at(line, col)) - (MAGIC_REAL) DARK_OFFSET) / sun.corrected_cos_sza;
