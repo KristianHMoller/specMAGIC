@@ -66,13 +66,13 @@ inline Metadata loadMetadata(const std::string& channel){
     // put the toml values into the metadata struct
     metadata.satellite_radius_km = config["navigation"]["satellite_radius_km"].value_or(0.0);
     {
-        auto maybe_lon = config["navigation"]["subsatellite_longitude_deg"].value<MAGIC_EXACT>();
-        if (!maybe_lon) {
+        auto parsed_lon = config["navigation"]["subsatellite_longitude_deg"].value<MAGIC_EXACT>();
+        if (!parsed_lon) {
             throw std::runtime_error(
                 "Missing required key 'navigation.subsatellite_longitude_deg' in " +
                 config_path.string());
         }
-        metadata.subsatellite_longitude_deg = *maybe_lon;
+        metadata.subsatellite_longitude_deg = *parsed_lon;
     }
     metadata.full_disk_scan_min = config["navigation"]["full_disk_scan_min"].value_or(0.0);
     
